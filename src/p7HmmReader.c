@@ -74,6 +74,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
       lineNumber++;
       size_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
 
+
       //check to make sure getline didn't have an allocation failure
       if(numCharactersRead == -1){
         printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer.");
@@ -92,6 +93,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
       if(lineBuffer[strlen(lineBuffer) - 1] == '\n'){
         lineBuffer[strlen(lineBuffer) - 1] = 0;
       }
+      size_t fullLineLength = strlen(lineBuffer);
 
       char *firstTokenLocation = strtok(lineBuffer, " ");
       if(firstTokenLocation == NULL){
@@ -108,13 +110,18 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             printAllocationError(fileSrc, lineNumber, "could not allocate memory to grow the P7ProfileHmmList list.");
             return p7HmmAllocationFailure;
           }
-          size_t versionLength = strlen(firstTokenLocation);
-          currentPhmm->header.version = malloc((versionLength + 1)*sizeof(char)); //+1 for null terminator
+          currentPhmm->header.version = malloc((fullLineLength + 1)*sizeof(char)); //+1 for null terminator
           if(currentPhmm->header.version == NULL){
             printAllocationError(fileSrc, lineNumber, "couldn't allocate buffer for format tag.");
             return p7HmmAllocationFailure;
           }
-          strcpy(currentPhmm->header.version, firstTokenLocation);
+          currentPhmm->header.version[0] = 0; //null terminate the format since we'll be concatenating to it
+          char *tokenLocation = firstTokenLocation;
+          while(tokenLocation != NULL){
+            strcat(currentPhmm->header.version, tokenLocation);
+            strcat(currentPhmm->header.version, " ");
+            strtok(NULL, " ");  //grab the next word of the format tag
+          }
 
           //now switch modes to parsing the header
           parserState = parsingHmmHeader;
