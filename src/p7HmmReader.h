@@ -36,7 +36,7 @@ struct P7Stats{
   float msvGumbleLambda;
   float viterbiGumbleMu;
   float viterbiGumbleLambda;
-  float fowardTau;
+  float forwardTau;
   float forwardLambda;
 };
 

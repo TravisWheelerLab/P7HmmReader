@@ -438,7 +438,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             }
 
             else if(strcmp(scoreDistributionName, "FORWARD") == 0){
-              currentPhmm->stats.fowardTau = mu;
+              currentPhmm->stats.forwardTau = mu;
               currentPhmm->stats.forwardLambda = lambda;
             }
             else{

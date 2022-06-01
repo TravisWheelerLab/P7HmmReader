@@ -51,7 +51,7 @@ void p7HmmInit(struct P7Hmm *phmm){
   phmm->stats.msvGumbleLambda = 0;
   phmm->stats.viterbiGumbleMu = 0;
   phmm->stats.viterbiGumbleLambda = 0;
-  phmm->stats.fowardTau = 0;
+  phmm->stats.forwardTau = 0;
   phmm->stats.forwardLambda = 0;
   phmm->model.comp0 = NULL;
   phmm->model.insert0Emissions = NULL;
