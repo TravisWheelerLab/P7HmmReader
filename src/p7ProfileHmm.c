@@ -52,7 +52,7 @@ void p7HmmInit(struct P7Hmm *phmm){
   phmm->stats.viterbiGumbleLambda = 0;
   phmm->stats.forwardTau = 0;
   phmm->stats.forwardLambda = 0;
-  phmm->model.comp0 = NULL;
+  phmm->model.compo = NULL;
   phmm->model.insert0Emissions = NULL;
   phmm->model.initialTransitions.beginToM1 = 0;
   phmm->model.initialTransitions.beginToInsert0 = 0;
@@ -78,7 +78,7 @@ void p7HmmDealloc(struct P7Hmm *phmm){
   free(phmm->header.accessionNumber);
   free(phmm->header.description);
   free(phmm->header.date);
-  free(phmm->model.comp0);
+  free(phmm->model.compo);
   free(phmm->model.insert0Emissions);
   free(phmm->model.matchEmissionScores);
   free(phmm->model.insertEmissionScores);
@@ -98,7 +98,7 @@ void p7HmmDealloc(struct P7Hmm *phmm){
   phmm->header.accessionNumber = NULL;
   phmm->header.description = NULL;
   phmm->header.date = NULL;
-  phmm->model.comp0 = NULL;
+  phmm->model.compo = NULL;
   phmm->model.insert0Emissions = NULL;
   phmm->model.matchEmissionScores = NULL;
   phmm->model.insertEmissionScores = NULL;

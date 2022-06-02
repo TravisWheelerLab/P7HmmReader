@@ -32,7 +32,7 @@
 #define P7_HEADER_STATS_FLAG "STATS"
 
 #define P7_BODY_HMM_MODEL_START_FLAG "HMM"
-#define P7_BODY_COMP0_FLAG "COMP0"
+#define P7_BODY_COMPO_FLAG "COMPO"
 #define P7_BODY_END_FLAG "//"
 
 //TODO: debug running through a phmm file
@@ -471,12 +471,18 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           break;
 
         case parsingHmmModelHead:
-          if(strcmp(firstTokenLocation, P7_BODY_COMP0_FLAG) == 0){
+          if(strcmp(firstTokenLocation, P7_BODY_COMPO_FLAG) == 0){
+            currentPhmm->model.compo = malloc(alphabetCardinality * sizeof(float));
+            if(currentPhmm->model.compo == NULL){
+              printAllocationError(fileSrc, lineNumber, "unable to allocate memory for COMPO array.");
+              return p7HmmAllocationFailure;
+            }
+
             for(uint32_t i = 0; i < alphabetCardinality; i++){
               char *flagText = strtok(NULL, " "); //grab the next float value
               if(flagText == NULL){
                 char printBuffer[256];
-                sprintf(printBuffer, "Error reading value #%u from comp0 line.", i+1);
+                sprintf(printBuffer, "Error reading value #%u from compo line.", i+1);
                 printFormatError(fileSrc, lineNumber, printBuffer);
                 return p7HmmFormatError;
               }
@@ -488,7 +494,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               }
             }
 
-            //read the insert0 emissions line. If we didn't find the COMP0 tag, this line will still be in the lineBuffer
+            //read the insert0 emissions line. If we didn't find the COMPO tag, this line will still be in the lineBuffer
             lineNumber++;
             numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
             if(numCharactersRead == -1){
@@ -512,7 +518,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               int numValuesScanned = sscanf(floatValuePtr, " %f ", &currentPhmm->model.insert0Emissions[i]);
               if(numValuesScanned < 1){
                 char printBuffer[256];
-                sprintf(printBuffer, "Error parsing float value #%u from comp0 line.", i);
+                sprintf(printBuffer, "Error parsing float value #%u from beginning transition probabilities line.", i);
                 printFormatError(fileSrc, lineNumber, printBuffer);
               }
               floatValuePtr = strtok(NULL, " ");  //load the next value

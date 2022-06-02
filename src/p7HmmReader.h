@@ -51,7 +51,7 @@ struct P7StateTransitions{
 };
 
 struct P7Model{
-  float *comp0;
+  float *compo;
   float *insert0Emissions;
   struct P7InitialTransitions initialTransitions;
   float *matchEmissionScores;
