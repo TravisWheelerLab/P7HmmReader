@@ -70,22 +70,19 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
     uint32_t expectedNodeIndex = 1;
     //for printing errors
     size_t lineNumber = 0;
+    bool completedParsingHmm = false; //used to determine if we're valid when we hit EOF
     while(true){
       lineNumber++;
       size_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
 
-
       //check to make sure getline didn't have an allocation failure
       if(numCharactersRead == -1){
-        printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer.");
-        return p7HmmAllocationFailure;
-      }
-      else if(numCharactersRead <= 2){  //2 is a reasonable number to distinguish a trailing newline from a line with a tag
-        if(feof(openedFile)){
-          if(parserState == parsingHmmIdle){
-            return p7HmmSuccess;
-          }
-          else return p7HmmFormatError;
+        if(completedParsingHmm){
+          return p7HmmSuccess;
+        }
+        else{
+          printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer.");
+          return p7HmmAllocationFailure;
         }
       }
 
@@ -100,11 +97,14 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
         //if the token is null, we can assume that this line only contained whitespace, so we should skip this line
         continue;
       }
-
+      if(lineNumber == 1035){
+        printf("break\n");
+      }
       switch(parserState){
         case parsingHmmIdle:
         //when looking for the format tag, only check to see if it starts with 'HMMER3'
         if(strncmp(firstTokenLocation, P7_HEADER_FORMAT_FLAG, strlen(P7_HEADER_FORMAT_FLAG)) == 0){
+          completedParsingHmm = false;
           //we've found another header, so append a new hmm to the list
           currentPhmm = p7HmmListAppendHmm(*phmmList);
           if(currentPhmm == NULL){
@@ -486,10 +486,10 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
                 printFormatError(fileSrc, lineNumber, printBuffer);
                 return p7HmmFormatError;
               }
-              int numValuesScanned = sscanf(flagText, " %f ", &currentPhmm->model.comp0[i]);
+              int numValuesScanned = sscanf(flagText, " %f ", &currentPhmm->model.compo[i]);
               if(numValuesScanned < 1){
                 char printBuffer[256];
-                sprintf(printBuffer, "Error parsing float value #%u from comp0 line.", i);
+                sprintf(printBuffer, "Error parsing float value #%u from compo line.", i);
                 printFormatError(fileSrc, lineNumber, printBuffer);
               }
             }
@@ -558,6 +558,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             printFormatError(fileSrc, lineNumber, errorMessageBuffer);
             return p7HmmFormatError;
           }
+          parserState = parsingHmmModelBody;
         }
         break;
 
@@ -565,6 +566,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
         case parsingHmmModelBody:
           if(strcmp(firstTokenLocation, P7_BODY_END_FLAG) == 0){
             //we've encountered an ending profile hmm body tag, so set the parser state and restart
+            completedParsingHmm = true;
             parserState = parsingHmmIdle;
             continue;
           }
