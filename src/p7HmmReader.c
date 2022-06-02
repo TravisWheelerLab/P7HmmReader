@@ -111,7 +111,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             printAllocationError(fileSrc, lineNumber, "could not allocate memory to grow the P7ProfileHmmList list.");
             return p7HmmAllocationFailure;
           }
-          currentPhmm->header.version = malloc((fullLineLength + 1)*sizeof(char)); //+1 for null terminator
+          currentPhmm->header.version = malloc((fullLineLength + 4)*sizeof(char)); //+4 for null terminator and extra space
           if(currentPhmm->header.version == NULL){
             printAllocationError(fileSrc, lineNumber, "couldn't allocate buffer for format tag.");
             return p7HmmAllocationFailure;
@@ -121,8 +121,10 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           while(tokenLocation != NULL){
             strcat(currentPhmm->header.version, tokenLocation);
             strcat(currentPhmm->header.version, " ");
-            strtok(NULL, " ");  //grab the next word of the format tag
+            tokenLocation = strtok(NULL, " ");  //grab the next word of the format tag
           }
+          //this adds an extra space at the end, so setting it to a null terminator gets rid of it
+          currentPhmm->header.version[strlen(currentPhmm->header.version)-1] = 0;
 
           //now switch modes to parsing the header
           parserState = parsingHmmHeader;
