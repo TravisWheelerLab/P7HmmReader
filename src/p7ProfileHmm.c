@@ -9,7 +9,7 @@ void p7HmmListInit(struct P7HmmList *phmmList){
 
 //returns NULL on error
 struct P7Hmm *p7HmmListAppendHmm(struct P7HmmList *phmmList){
-  void *profileHmmListPointer = realloc(phmmList->phmms, phmmList->count + 1);
+  void *profileHmmListPointer = realloc(phmmList->phmms, sizeof(struct P7Hmm) * (phmmList->count + 1));
   if(profileHmmListPointer == NULL){
     return NULL;
   }
@@ -20,7 +20,6 @@ struct P7Hmm *p7HmmListAppendHmm(struct P7HmmList *phmmList){
     phmmList->count++;
     return newlyAllocatedPhmm;
   }
-  // return false; //fall-through case if the malloc failed
 }
 
 void p7HmmInit(struct P7Hmm *phmm){
@@ -143,26 +142,48 @@ uint32_t hmmReaderGetAlphabetCardinality(const struct P7Hmm *const currentPhmm){
 //the application must know the alphabet being used in order to allocate memory correctly,
 //so this will likely be done after reading the header.
 enum P7HmmReturnCode p7HmmAllocateModelData(struct P7Hmm *currentPhmm, const uint32_t alphabetCardinality){
+  const uint32_t modelLength = currentPhmm->header.modelLength;
   currentPhmm->model.insert0Emissions       = malloc(alphabetCardinality * sizeof(float));
-  currentPhmm->model.matchEmissionScores    = malloc(alphabetCardinality * sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.insertEmissionScores   = malloc(alphabetCardinality * sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.stateTransitions.matchToMatch    = malloc(sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.stateTransitions.matchToInsert   = malloc(sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.stateTransitions.matchToDelete   = malloc(sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.stateTransitions.insertToMatch   = malloc(sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.stateTransitions.insertToInsert  = malloc(sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.stateTransitions.deleteToMatch   = malloc(sizeof(float) * currentPhmm->header.modelLength);
-  currentPhmm->model.stateTransitions.deleteToDelete  = malloc(sizeof(float) * currentPhmm->header.modelLength);
+  currentPhmm->model.matchEmissionScores    = malloc(alphabetCardinality * sizeof(float) * modelLength);
+  currentPhmm->model.insertEmissionScores   = malloc(alphabetCardinality * sizeof(float) * modelLength);
+  currentPhmm->model.stateTransitions.matchToMatch    = malloc(sizeof(float) * modelLength);
+  currentPhmm->model.stateTransitions.matchToInsert   = malloc(sizeof(float) * modelLength);
+  currentPhmm->model.stateTransitions.matchToDelete   = malloc(sizeof(float) * modelLength);
+  currentPhmm->model.stateTransitions.insertToMatch   = malloc(sizeof(float) * modelLength);
+  currentPhmm->model.stateTransitions.insertToInsert  = malloc(sizeof(float) * modelLength);
+  currentPhmm->model.stateTransitions.deleteToMatch   = malloc(sizeof(float) * modelLength);
+  currentPhmm->model.stateTransitions.deleteToDelete  = malloc(sizeof(float) * modelLength);
 
   //bitwise OR the allocated arrays togeter to determine if the allocation suceeded
-  bool allAllocationsSuccessful = currentPhmm->model.insert0Emissions != NULL &&
+  bool majorAllocationsSuccessful = currentPhmm->model.insert0Emissions != NULL &&
     currentPhmm->model.matchEmissionScores != NULL && currentPhmm->model.insertEmissionScores != NULL &&
     currentPhmm->model.stateTransitions.matchToMatch != NULL && currentPhmm->model.stateTransitions.matchToInsert != NULL &&
     currentPhmm->model.stateTransitions.matchToDelete != NULL && currentPhmm->model.stateTransitions.insertToMatch != NULL &&
     currentPhmm->model.stateTransitions.insertToInsert != NULL && currentPhmm->model.stateTransitions.deleteToMatch != NULL &&
     currentPhmm->model.stateTransitions.deleteToDelete != NULL;
 
-  if(allAllocationsSuccessful){
+    if(currentPhmm->header.hasReferenceAnnotation){
+      currentPhmm->model.referenceAnnotation = malloc(sizeof(char) * modelLength);
+      majorAllocationsSuccessful &= (currentPhmm->model.referenceAnnotation != NULL);
+    }
+    if(currentPhmm->header.hasModelMask){
+      currentPhmm->model.modelMask = malloc(sizeof(bool) * modelLength);
+      majorAllocationsSuccessful &= (currentPhmm->model.modelMask != NULL);
+    }
+    if(currentPhmm->header.hasConsensusResidue){
+      currentPhmm->model.consensusResidues = malloc(sizeof(char) * modelLength);
+      majorAllocationsSuccessful &= (currentPhmm->model.consensusResidues != NULL);
+    }
+    if(currentPhmm->header.hasConsensusStructure){
+      currentPhmm->model.consensusStructure = malloc(sizeof(char) * modelLength);
+      majorAllocationsSuccessful &= (currentPhmm->model.consensusStructure != NULL);
+    }
+    if(currentPhmm->header.hasMapAnnotation){
+      currentPhmm->model.mapAnnotations = malloc(sizeof(uint32_t) * modelLength);
+      majorAllocationsSuccessful &= (currentPhmm->model.mapAnnotations != NULL);
+    }
+
+  if(majorAllocationsSuccessful){
     return p7HmmSuccess;
   }
   else{
