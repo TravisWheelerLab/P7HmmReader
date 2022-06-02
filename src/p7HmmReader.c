@@ -316,7 +316,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             if(flagText == NULL){
               printFormatError(fileSrc, lineNumber, "couldn't parse date tag (DATE).");
             }
-            currentPhmm->header.date = malloc(sizeof(flagText) + 1);
+            currentPhmm->header.date = malloc(strlen(flagText) + 1);
             if(currentPhmm->header.date == NULL){
               printAllocationError(fileSrc, lineNumber, "couldn't allocate memory for date buffer.");
               return p7HmmFormatError;
@@ -416,7 +416,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               return p7HmmFormatError;
             }
           }
-          if(strcmp(firstTokenLocation, P7_HEADER_STATS_FLAG)){
+          if(strcmp(firstTokenLocation, P7_HEADER_STATS_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
             if(flagText == NULL){
               printFormatError(fileSrc, lineNumber, "couldn't parse STATS flag.");
