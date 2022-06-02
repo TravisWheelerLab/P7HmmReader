@@ -22,7 +22,7 @@ enum P7Alphabet{
 };
 
 struct P7InitialTransitions{
-  float beginToM1;;
+  float beginToM1;
   float beginToInsert0;
   float beginToDelete1;
   float insert0ToMatch1;
