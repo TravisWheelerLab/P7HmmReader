@@ -64,7 +64,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
 
     FILE *openedFile = fopen(fileSrc, "r");
 
-    enum HmmReaderParserState parserState = parsingHmmHeader;
+    enum HmmReaderParserState parserState = parsingHmmIdle;
     uint32_t alphabetCardinality = 0;
     //for counting which node number we're in when we get to the model body
     uint32_t expectedNodeIndex = 1;
