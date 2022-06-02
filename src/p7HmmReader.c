@@ -103,7 +103,8 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
 
       switch(parserState){
         case parsingHmmIdle:
-        if(strcmp(firstTokenLocation, P7_HEADER_FORMAT_FLAG) == 0){
+        //when looking for the format tag, only check to see if it starts with 'HMMER3'
+        if(strncmp(firstTokenLocation, P7_HEADER_FORMAT_FLAG, strlen(P7_HEADER_FORMAT_FLAG)) == 0){
           //we've found another header, so append a new hmm to the list
           currentPhmm = p7HmmListAppendHmm(*phmmList);
           if(currentPhmm == NULL){
