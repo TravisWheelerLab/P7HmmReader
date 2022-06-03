@@ -32,48 +32,54 @@ bool floatCompare(float f1, float f2){
 
 int main(int argc, char ** argv){
   printf("\n\tstarting amylase test\n");
-  struct P7HmmList *phmmList;
+  struct P7HmmList phmmList;
   enum P7HmmReturnCode rc = readP7Hmm(amylaseFileSrc, &phmmList);
   sprintf(printBuffer, "read hmm gave return code %u, expected success (%u)\n", rc, p7HmmSuccess);
   testAssertString(rc == p7HmmSuccess, printBuffer);
-  testAssertString(phmmList != NULL, "phmmList Returned Null");
-  amalyseHmmTest(&phmmList->phmms[0]);
-  p7HmmListDealloc(phmmList);
+  testAssertString(phmmList.phmms != NULL, "phmmList Returned Null");
+  testAssertString(phmmList.count == 1, "phmmList did not have expected count of 1");
+  amalyseHmmTest(&phmmList.phmms[0]);
+  p7HmmListDealloc(&phmmList);
 
   printf("\n\tstarting ox test\n");
   rc = readP7Hmm(oxFileSrc, &phmmList);
   testAssertString(rc == p7HmmSuccess, printBuffer);
-  testAssertString(phmmList != NULL, "phmmList Returned Null");
-  oxHmmTest(&phmmList->phmms[0]);
-  p7HmmListDealloc(phmmList);
+  testAssertString(phmmList.phmms != NULL, "phmmList Returned Null");
+  testAssertString(phmmList.count == 1, "phmmList did not have expected count of 1");
+  oxHmmTest(&phmmList.phmms[0]);
+  p7HmmListDealloc(&phmmList);
 
   printf("\n\tstarting t2 test\n");
   rc = readP7Hmm(t2FileSrc, &phmmList);
   testAssertString(rc == p7HmmSuccess, printBuffer);
-  testAssertString(phmmList != NULL, "phmmList Returned Null");
-  t2HmmTest(&phmmList->phmms[0]);
-  p7HmmListDealloc(phmmList);
+  testAssertString(phmmList.phmms != NULL, "phmmList Returned Null");
+  testAssertString(phmmList.count == 1, "phmmList did not have expected count of 1");
+  t2HmmTest(&phmmList.phmms[0]);
+  p7HmmListDealloc(&phmmList);
 
   printf("\n\tstarting thio test\n");
   rc = readP7Hmm(thioFileSrc, &phmmList);
   testAssertString(rc == p7HmmSuccess, printBuffer);
-  testAssertString(phmmList != NULL, "phmmList Returned Null");
-  thioHmmTest(&phmmList->phmms[0]);
-  p7HmmListDealloc(phmmList);
+  testAssertString(phmmList.phmms != NULL, "phmmList Returned Null");
+  testAssertString(phmmList.count == 1, "phmmList did not have expected count of 1");
+  thioHmmTest(&phmmList.phmms[0]);
+  p7HmmListDealloc(&phmmList);
 
   printf("\n\tstarting tae test\n");
   rc = readP7Hmm(taeFileSrc, &phmmList);
   testAssertString(rc == p7HmmSuccess, printBuffer);
-  testAssertString(phmmList != NULL, "phmmList Returned Null");
-  taeHmmTest(&phmmList->phmms[0]);
-  p7HmmListDealloc(phmmList);
+  testAssertString(phmmList.phmms != NULL, "phmmList Returned Null");
+  testAssertString(phmmList.count == 1, "phmmList did not have expected count of 1");
+  taeHmmTest(&phmmList.phmms[0]);
+  p7HmmListDealloc(&phmmList);
 
   printf("\n\tstarting combined test\n");
   rc = readP7Hmm(combinedFileSrc, &phmmList);
   testAssertString(rc == p7HmmSuccess, printBuffer);
-  testAssertString(phmmList != NULL, "phmmList Returned Null");
-  combinedHmmTest(phmmList);
-  p7HmmListDealloc(phmmList);
+  testAssertString(phmmList.phmms != NULL, "phmmList Returned Null");
+  testAssertString(phmmList.count == 5, "phmmList did not have expected count of 1");
+  combinedHmmTest(&phmmList);
+  p7HmmListDealloc(&phmmList);
 }
 
 
