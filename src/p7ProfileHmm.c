@@ -28,7 +28,7 @@ void p7HmmInit(struct P7Hmm *phmm){
   phmm->header.hasConsensusResidue = false;
   phmm->header.hasConsensusStructure = false;
   phmm->header.hasMapAnnotation = false;
-  phmm->header.alphabet = DNA;
+  phmm->header.alphabet = ALPHABET_NOT_SET;
   phmm->header.modelLength = 0;
   phmm->header.maxLength = 0;
   phmm->header.numSequences = 0;
@@ -127,9 +127,8 @@ void p7HmmListDealloc(struct P7HmmList *phmmList){
   phmmList->count = 0;
 }
 
-//returns 0 if the alphabet type is unsupported, although this shouldn't happen in practice
-//unless the struct has been tampered with.
-uint32_t hmmReaderGetAlphabetCardinality(const struct P7Hmm *const currentPhmm){
+//returns 0 if the alphabet type is unsupported or unset
+uint32_t p7HmmGetAlphabetCardinality(const struct P7Hmm *const currentPhmm){
   switch(currentPhmm->header.alphabet){
     case(amino): return 20;
     case(DNA):  return 4;
@@ -143,8 +142,15 @@ uint32_t hmmReaderGetAlphabetCardinality(const struct P7Hmm *const currentPhmm){
 //allocates model arrays for the given phmm, based on its header data.
 //the application must know the alphabet being used in order to allocate memory correctly,
 //so this will likely be done after reading the header.
-enum P7HmmReturnCode p7HmmAllocateModelData(struct P7Hmm *currentPhmm, const uint32_t alphabetCardinality){
+enum P7HmmReturnCode p7HmmAllocateModelData(struct P7Hmm *currentPhmm){
+  const uint32_t alphabetCardinality = p7HmmGetAlphabetCardinality(currentPhmm);
   const uint32_t modelLength = currentPhmm->header.modelLength;
+  if(alphabetCardinality == 0){
+    return p7HmmFormatError;
+  }
+  if(modelLength == 0){
+    return p7HmmFormatError;
+  }
   currentPhmm->model.insert0Emissions       = malloc(alphabetCardinality * sizeof(float));
   currentPhmm->model.matchEmissionScores    = malloc(alphabetCardinality * sizeof(float) * modelLength);
   currentPhmm->model.insertEmissionScores   = malloc(alphabetCardinality * sizeof(float) * modelLength);

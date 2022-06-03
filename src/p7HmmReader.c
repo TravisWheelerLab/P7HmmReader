@@ -534,15 +534,27 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
           }
           if(strcmp(firstTokenLocation, P7_BODY_HMM_MODEL_START_FLAG) == 0){
             parserState = parsingHmmModelHead;
-            enum P7HmmReturnCode returnCode = p7HmmAllocateModelData(currentPhmm, hmmReaderGetAlphabetCardinality(currentPhmm));
-            if(returnCode != p7HmmSuccess){
+            enum P7HmmReturnCode returnCode = p7HmmAllocateModelData(currentPhmm);
+            if(returnCode == p7HmmFormatError){
+              p7HmmListDealloc(phmmList);
+              free(lineBuffer);
+              printFormatError(fileSrc, lineNumber, "model alphabet and/or model length was not set.");
+              return p7HmmAllocationFailure;
+            }
+            else if(returnCode == p7HmmAllocationFailure){
               p7HmmListDealloc(phmmList);
               free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "failed to allocate memory for all buffers for P7 model.");
               return p7HmmAllocationFailure;
             }
 
-            alphabetCardinality = hmmReaderGetAlphabetCardinality(currentPhmm);
+            alphabetCardinality = p7HmmGetAlphabetCardinality(currentPhmm);
+            if(alphabetCardinality == 0){
+              p7HmmListDealloc(phmmList);
+              free(lineBuffer);
+              printAllocationError(fileSrc, lineNumber, "model alphabet is required at this point in the file, but was not set.");
+              return p7HmmFormatError;
+            }
 
             //also consume the next line of labels for the transition characters
             lineNumber++;

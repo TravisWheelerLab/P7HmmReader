@@ -168,7 +168,7 @@ void testHmmHeader(struct P7Hmm *phmm, const char *expectedVersion, const char *
 
 void printSanityCheckInfo(struct P7Hmm *phmm){
   printf("---------------------------------\n");
-  uint32_t alphabetCardinality = hmmReaderGetAlphabetCardinality(phmm);
+  uint32_t alphabetCardinality = p7HmmGetAlphabetCardinality(phmm);
   if(phmm->model.compo != NULL){
     printf("\tCOMPO");
     for(size_t i = 0; i < alphabetCardinality; i++){
