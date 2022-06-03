@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "p7HmmReader.h"
 #include "p7ProfileHmm.h"
 #include "p7HmmReaderLog.h"
@@ -96,9 +97,6 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
       if(firstTokenLocation == NULL){
         //if the token is null, we can assume that this line only contained whitespace, so we should skip this line
         continue;
-      }
-      if(lineNumber == 1035){
-        printf("break\n");
       }
       switch(parserState){
         case parsingHmmIdle:
@@ -624,18 +622,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
-          if((tokenPointer[0] == '-') && (currentPhmm->header.hasMapAnnotation)){
-            printFormatError(fileSrc, lineNumber,
-              "Error: header declared the file has map annotations, but none given on match line.");
-            return p7HmmFormatError;
-          }
-          else if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasMapAnnotation)){
+          if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasMapAnnotation)){
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have map annotations, but integer value given on match line.");
             return p7HmmFormatError;
           }
           else if(!(tokenPointer[0] == '-') && (currentPhmm->header.hasMapAnnotation)){
-            numItemsScanned = sscanf(tokenPointer, " %u", &currentPhmm->model.mapAnnotations[nodeIndex]);
+            numItemsScanned = sscanf(tokenPointer, " %u", &currentPhmm->model.mapAnnotations[nodeIndex - 1]);
             if(numItemsScanned != 1){
               printFormatError(fileSrc, lineNumber,
                 "Error: could not parse integer value for map annotation value.");
@@ -644,85 +637,71 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           }
 
           //read consensus residue value
-          tokenPointer = strtok(NULL, "");
+          tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize consensus residue value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
-          if((tokenPointer[0] == '-') && (currentPhmm->header.hasConsensusResidue)){
+          if((tokenPointer[0] != '-') && (!currentPhmm->header.hasConsensusResidue)){
             printFormatError(fileSrc, lineNumber,
-              "Error: header declared the file has consensus residues, but none given on match line.");
-            return p7HmmFormatError;
+              "Warning: header declared the file does not have consensus residues, but character residue value was given on match line.");
           }
-          else if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasConsensusResidue)){
-            printFormatError(fileSrc, lineNumber,
-              "Error: header declared the file does not have consensus residues, but character residue value was given on match line.");
-            return p7HmmFormatError;
+          else if(tokenPointer[0] != '-'){
+            currentPhmm->model.consensusResidues[nodeIndex - 1] = tokenPointer[0];
           }
-          currentPhmm->model.consensusResidues[nodeIndex] = tokenPointer[0];
 
           //read reference annotation value
-          tokenPointer = strtok(NULL, "");
+          tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize reference annotation value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
-          if((tokenPointer[0] == '-') && (currentPhmm->header.hasReferenceAnnotation)){
-            printFormatError(fileSrc, lineNumber,
-              "Error: header declared the file has reference annotation, but none given on match line.");
-            return p7HmmFormatError;
-          }
-          else if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasReferenceAnnotation)){
+          if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasReferenceAnnotation)){
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have reference annotation, but character residue value was given on match line.");
             return p7HmmFormatError;
           }
-          currentPhmm->model.referenceAnnotation[nodeIndex] = tokenPointer[0];
+          else if(tokenPointer[0] != '-'){
+            currentPhmm->model.referenceAnnotation[nodeIndex - 1] = tokenPointer[0];
+          }
 
           //read model mask value
-          tokenPointer = strtok(NULL, "");
+          tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize model mask value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
-          if((tokenPointer[0] == '-') && (currentPhmm->header.hasModelMask)){
-            printFormatError(fileSrc, lineNumber,
-              "Error: header declared the file has reference annotation, but none given on match line.");
-            return p7HmmFormatError;
-          }
-          else if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasModelMask)){
+          if((tokenPointer[0] != '-') && (!currentPhmm->header.hasModelMask)){
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have reference annotation, but character residue value was given on match line.");
             return p7HmmFormatError;
           }
-          currentPhmm->model.modelMask[nodeIndex] = tokenPointer[0] == 'm';
-
+          else if(tokenPointer[0] != '-'){
+            currentPhmm->model.modelMask[nodeIndex - 1] = tokenPointer[0] == 'm';
+          }
 
           //read consensus structure value
-          tokenPointer = strtok(NULL, "");
+          tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize consensus structure value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
-          if((tokenPointer[0] == '-') && (currentPhmm->header.hasConsensusStructure)){
-            printFormatError(fileSrc, lineNumber,
-              "Error: header declared the file has consensus structure, but none given on match line.");
-            return p7HmmFormatError;
-          }
-          else if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasConsensusStructure)){
+          if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasConsensusStructure)){
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have reference annotation, but character residue value was given on match line.");
             return p7HmmFormatError;
           }
-          currentPhmm->model.consensusStructure[nodeIndex] = tokenPointer[0];
+          else if(tokenPointer[0] != '-'){
+            currentPhmm->model.consensusStructure[nodeIndex - 1] = tokenPointer[0];
+          }
 
 
           //get the insert emissions line
@@ -754,7 +733,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
                 "Error: could not tokenize insert emission value.");
               return p7HmmFormatError;
           }
-          size_t indexIntoEmissionScores = nodeIndex * alphabetCardinality;
+          size_t indexIntoEmissionScores = (nodeIndex-1) * alphabetCardinality;
           sscanf(tokenPointer, " %f ", &currentPhmm->model.insertEmissionScores[indexIntoEmissionScores]);
           if(numItemsScanned != 1){
             printFormatError(fileSrc, lineNumber,
@@ -799,26 +778,97 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(lineBuffer[strlen(lineBuffer) - 1] == '\n'){
             lineBuffer[strlen(lineBuffer) - 1] = 0;
           }
+          //parse out the state transition scores.
+          char *tokenLocation = strtok(lineBuffer, " ");
+          if(tokenLocation == NULL){
+            printFormatError(fileSrc, lineNumber, "failed to parse match to match state transition score (1st value on state transition line).");
+            return p7HmmFormatError;
+          }
+          int numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.matchToMatch[nodeIndex - 1]);
+          if(numScanned != 1){
+            printFormatError(fileSrc, lineNumber, "failed to parse match to match state transition score (1st value on state transition line).");
+            return p7HmmFormatError;
+          }
 
-          numItemsScanned = sscanf(lineBuffer, " %f %f %f %f %f %f %f",
-            &currentPhmm->model.stateTransitions.matchToMatch[nodeIndex],
-            &currentPhmm->model.stateTransitions.matchToInsert[nodeIndex],
-            &currentPhmm->model.stateTransitions.matchToDelete[nodeIndex],
-            &currentPhmm->model.stateTransitions.insertToMatch[nodeIndex],
-            &currentPhmm->model.stateTransitions.insertToInsert[nodeIndex],
-            &currentPhmm->model.stateTransitions.deleteToMatch[nodeIndex],
-            &currentPhmm->model.stateTransitions.deleteToDelete[nodeIndex]);
+          tokenLocation = strtok(NULL, " ");
+          if(tokenLocation == NULL){
+            printFormatError(fileSrc, lineNumber, "failed to parse match to insert state transition score (2nd value on state transition line).");
+            return p7HmmFormatError;
+          }
+          numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.matchToInsert[nodeIndex - 1]);
+          if(numScanned != 1){
+            printFormatError(fileSrc, lineNumber, "failed to parse match to insert state transition score (2nd value on state transition line).");
+            return p7HmmFormatError;
+          }
 
-            if(numItemsScanned != 7){
-              char errorMessageBuffer[512];
-              sprintf(errorMessageBuffer,
-                "Error: expected 7 values on state transitions line, but got %i.",
-                numItemsScanned);
-              printFormatError(fileSrc, lineNumber, errorMessageBuffer);
+          tokenLocation = strtok(NULL, " ");
+          if(tokenLocation == NULL){
+            printFormatError(fileSrc, lineNumber, "failed to parse match to delete state transition score(3rd value on state transition line).");
+            return p7HmmFormatError;
+          }
+          if(nodeIndex == currentPhmm->header.modelLength){
+            //this is the last node, so this will always be '*', for infinity. since -log(INF) is undefined, we set to NAN
+            currentPhmm->model.stateTransitions.matchToDelete[nodeIndex - 1] = NAN;
+          }
+          else{
+            numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.matchToDelete[nodeIndex - 1]);
+            if(numScanned != 1){
+              printFormatError(fileSrc, lineNumber, "failed to parse match to delete state transition score(3rd value on state transition line).");
               return p7HmmFormatError;
-
             }
-          break;
+          }
+
+          tokenLocation = strtok(NULL, " ");
+          if(tokenLocation == NULL){
+            printFormatError(fileSrc, lineNumber, "failed to parse insert to match state transition score (4th value on state transition line).");
+            return p7HmmFormatError;
+          }
+          numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.insertToMatch[nodeIndex - 1]);
+          if(numScanned != 1){
+            printFormatError(fileSrc, lineNumber, "failed to parse insert to match state transition score (4th value on state transition line).");
+            return p7HmmFormatError;
+          }
+
+          tokenLocation = strtok(NULL, " ");
+          if(tokenLocation == NULL){
+            printFormatError(fileSrc, lineNumber, "failed to parse insert to insert state transition score (5th value on state transition line).");
+            return p7HmmFormatError;
+          }
+          numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.insertToInsert[nodeIndex - 1]);
+          if(numScanned != 1){
+            printFormatError(fileSrc, lineNumber, "failed to parse insert to insert state transition score (5th value on state transition line).");
+            return p7HmmFormatError;
+          }
+
+          tokenLocation = strtok(NULL, " ");
+          if(tokenLocation == NULL){
+            printFormatError(fileSrc, lineNumber, "failed to parse delete to match state transition score (6th value on state transition line).");
+            return p7HmmFormatError;
+          }
+          numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.deleteToMatch[nodeIndex - 1]);
+          if(numScanned != 1){
+            printFormatError(fileSrc, lineNumber, "failed to parse delete to match state transition score (6th value on state transition line).");
+            return p7HmmFormatError;
+          }
+
+          tokenLocation = strtok(NULL, " ");
+          if(tokenLocation == NULL){
+            printFormatError(fileSrc, lineNumber, "failed to parse delete to delete state transition score (7th value on state transition line).");
+            return p7HmmFormatError;
+          }
+          if(nodeIndex == currentPhmm->header.modelLength){
+            //this is the last node, so this will always be '*', for infinity. since -log(INF) is undefined, we set to NAN
+            currentPhmm->model.stateTransitions.deleteToDelete[nodeIndex - 1] = NAN;
+          }
+          else{
+            numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.deleteToDelete[nodeIndex - 1]);
+            if(numScanned != 1){
+              printFormatError(fileSrc, lineNumber, "failed to parse delete to delete state transition score (7th value on state transition line).");
+              return p7HmmFormatError;
+            }
+          }
+
+        break;
       }
     }
 
