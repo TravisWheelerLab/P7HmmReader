@@ -56,6 +56,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
     //init the profilehmm list
     *phmmList = malloc(sizeof(struct P7HmmList));
     if(phmmList == NULL){
+      free(lineBuffer);
       printAllocationError(fileSrc, 0, "failed to allocate memory for profileHmmList.");
       return p7HmmAllocationFailure;
     }
@@ -79,9 +80,11 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
       //check to make sure getline didn't have an allocation failure
       if(numCharactersRead == -1){
         if(completedParsingHmm){
+          free(lineBuffer);
           return p7HmmSuccess;
         }
         else{
+          free(lineBuffer);
           printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer.");
           return p7HmmAllocationFailure;
         }
@@ -102,15 +105,18 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
         case parsingHmmIdle:
         //when looking for the format tag, only check to see if it starts with 'HMMER3'
         if(strncmp(firstTokenLocation, P7_HEADER_FORMAT_FLAG, strlen(P7_HEADER_FORMAT_FLAG)) == 0){
+          expectedNodeIndex = 1;
           completedParsingHmm = false;
           //we've found another header, so append a new hmm to the list
           currentPhmm = p7HmmListAppendHmm(*phmmList);
           if(currentPhmm == NULL){
+            free(lineBuffer);
             printAllocationError(fileSrc, lineNumber, "could not allocate memory to grow the P7ProfileHmmList list.");
             return p7HmmAllocationFailure;
           }
           currentPhmm->header.version = malloc((fullLineLength + 4)*sizeof(char)); //+4 for null terminator and extra space
           if(currentPhmm->header.version == NULL){
+            free(lineBuffer);
             printAllocationError(fileSrc, lineNumber, "couldn't allocate buffer for format tag.");
             return p7HmmAllocationFailure;
           }
@@ -140,6 +146,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             else{
               currentPhmm->header.name = malloc(strlen(nameText)+1);
               if(currentPhmm->header.name == NULL){
+                free(lineBuffer);
                 printAllocationError(fileSrc, lineNumber, "unalble to allocate memory for name.");
                 return p7HmmAllocationFailure;
               }
@@ -151,11 +158,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_ACCESSION_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse accession number tag (ACC).");
               return p7HmmFormatError;
             }
             currentPhmm->header.accessionNumber = malloc(strlen(flagText)+1);
             if(currentPhmm->header.accessionNumber == NULL){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "couldn't allocate buffer for accession number tag (ACC).");
               return p7HmmAllocationFailure;
             }
@@ -164,6 +173,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_DESCRIPTION_FLAG) == 0){
             char *flagText = strtok(NULL, "");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse description tag (DESC).");
               return p7HmmFormatError;
             }
@@ -173,6 +183,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             }
             currentPhmm->header.description = malloc(strlen(flagText)+1);
             if(currentPhmm->header.description == NULL){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "couldn't allocate buffer for description tag (DESC).");
               return p7HmmAllocationFailure;
             }
@@ -181,11 +192,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_LENGTH_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse model length tag (LENG).");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, "%u", &currentPhmm->header.modelLength);
             if(scanVariablesFilled < 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected positive nonzero integer after model length tag (LENG).");
               return p7HmmFormatError;
             }
@@ -193,11 +206,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_MAXL_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse max length tag (MAXL).");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %u", &currentPhmm->header.maxLength);
             if(scanVariablesFilled == EOF || (currentPhmm->header.maxLength == 0)){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected positive nonzero integer after max length tag (MAXL).");
               return p7HmmFormatError;
             }
@@ -205,6 +220,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_ALPHABET_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse alphabet tag (ALPH).");
               return p7HmmFormatError;
             }
@@ -224,6 +240,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               currentPhmm->header.alphabet = dice;
             }
             else{
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 'amino', 'DNA', 'RNA', 'coins', or 'dice' after alphabet tag (ALPH).");
               return p7HmmFormatError;
             }
@@ -231,6 +248,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_REFERENCE_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse consensus annotation tag (CONS).");
               return p7HmmFormatError;
             }
@@ -241,6 +259,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               currentPhmm->header.hasReferenceAnnotation = false;
             }
             else{
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 'yes' or 'no' after reference annotation tag (RF).");
               return p7HmmFormatError;
             }
@@ -248,6 +267,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_MASK_FLAG) == 0){
             char *flagText = strtok(NULL ," ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse model mask tag (MM).");
               return p7HmmFormatError;
             }
@@ -258,6 +278,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               currentPhmm->header.hasModelMask = false;
             }
             else{
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 'yes' or 'no' after model mask tag (MM).");
               return p7HmmFormatError;
             }
@@ -265,6 +286,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_CONSENSUS_RESIDUE_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse consensus residue tag (CONS).");
               return p7HmmFormatError;
             }
@@ -275,6 +297,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               currentPhmm->header.hasConsensusResidue = false;
             }
             else{
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 'yes' or 'no' after consensus residue tag (CONS).");
               return p7HmmFormatError;
             }
@@ -282,6 +305,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_CONSENSUS_STRUCTURE_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse consensus structure tag (CS).");
               return p7HmmFormatError;
             }
@@ -292,6 +316,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               currentPhmm->header.hasConsensusStructure = false;
             }
             else{
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 'yes' or 'no' after consensus structure tag (CS).");
               return p7HmmFormatError;
             }
@@ -299,6 +324,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_MAP_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse map annotation tag (MAP).");
               return p7HmmFormatError;
             }
@@ -309,6 +335,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               currentPhmm->header.hasMapAnnotation = false;
             }
             else{
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 'yes' or 'no' after map annotation tag (MAP).");
               return p7HmmFormatError;
             }
@@ -324,6 +351,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             }
             currentPhmm->header.date = malloc(strlen(flagText) + 1);
             if(currentPhmm->header.date == NULL){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "couldn't allocate memory for date buffer.");
               return p7HmmFormatError;
             }
@@ -340,6 +368,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             //resize the current commandLineHistory to include the
             char *expandedCmdHistory = realloc(currentPhmm->header.commandLineHistory, expandedCmdHistoryLength * sizeof(char));
             if(expandedCmdHistory == NULL){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "failed to allocate memory for command line history buffer.");
               return p7HmmAllocationFailure;
             }
@@ -353,11 +382,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_NSEQ_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse sequence number tag (NSEQ).");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %d", &currentPhmm->header.numSequences);
             if(scanVariablesFilled < 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 1 float value after sequence number tag (NSEQ).");
               return p7HmmFormatError;
             }
@@ -365,11 +396,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_EFFN_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse effective sequence number tag (EFFN).");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %f", &currentPhmm->header.effectiveNumSequences);
             if(scanVariablesFilled < 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 1 float value after effective sequence number tag (EFFN).");
               return p7HmmFormatError;
             }
@@ -377,11 +410,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_CHECKSUM_FLAG) == 0){
             char *flagText = strtok(NULL, " ");
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse checksum tag (CKSUM).");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %u", &currentPhmm->header.checksum);
             if(scanVariablesFilled < 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, " unsigned 32-bit int value is required after checksum tag.");
               return p7HmmFormatError;
             }
@@ -389,11 +424,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_GATHERING_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse GA tag.");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.gatheringThresholds[0], &currentPhmm->header.gatheringThresholds[1]);
             if(scanVariablesFilled < 2){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 2 float values after GA tag.");
               return p7HmmFormatError;
             }
@@ -401,11 +438,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_TRUSTED_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse TC tag.");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.trustedCutoffs[0], &currentPhmm->header.trustedCutoffs[1]);
             if(scanVariablesFilled != 2){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 2 float values after TC tag.");
               return p7HmmFormatError;
             }
@@ -413,11 +452,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_NOISE_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse NC flag.");
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.noiseCutoffs[0], &currentPhmm->header.noiseCutoffs[1]);
             if(scanVariablesFilled != 2){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 2 float values after NC flag.");
               return p7HmmFormatError;
             }
@@ -425,6 +466,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_HEADER_STATS_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
             if(flagText == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "couldn't parse STATS flag.");
               return p7HmmFormatError;
             }
@@ -433,6 +475,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             float lambda; //second value
             int scanVariablesFilled = sscanf(flagText, " LOCAL %s %f %f", scoreDistributionName, &mu, &lambda);
             if(scanVariablesFilled != 3){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "expected distribution name and 2 float values after STATS.");
               return p7HmmFormatError;
@@ -451,6 +494,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               currentPhmm->stats.forwardLambda = lambda;
             }
             else{
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "couldn't parse distribution name. exected distribution name of MSV, VITERBI, or FORWARD.");
               return p7HmmFormatError;
@@ -460,6 +504,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             parserState = parsingHmmModelHead;
             enum P7HmmReturnCode returnCode = p7HmmAllocateModelData(currentPhmm, hmmReaderGetAlphabetCardinality(currentPhmm));
             if(returnCode != p7HmmSuccess){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "failed to allocate memory for all buffers for P7 model.");
               return p7HmmAllocationFailure;
             }
@@ -470,6 +515,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             lineNumber++;
             size_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
             if(numCharactersRead < 1){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "getline failed to create buffer.");
               return p7HmmAllocationFailure;
             }
@@ -480,6 +526,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           if(strcmp(firstTokenLocation, P7_BODY_COMPO_FLAG) == 0){
             currentPhmm->model.compo = malloc(alphabetCardinality * sizeof(float));
             if(currentPhmm->model.compo == NULL){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "unable to allocate memory for COMPO array.");
               return p7HmmAllocationFailure;
             }
@@ -487,6 +534,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             for(uint32_t i = 0; i < alphabetCardinality; i++){
               char *flagText = strtok(NULL, " "); //grab the next float value
               if(flagText == NULL){
+                free(lineBuffer);
                 char printBuffer[256];
                 sprintf(printBuffer, "Error reading value #%u from compo line.", i+1);
                 printFormatError(fileSrc, lineNumber, printBuffer);
@@ -504,10 +552,12 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             lineNumber++;
             numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
             if(numCharactersRead == -1){
+              free(lineBuffer);
               printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer.");
               return p7HmmAllocationFailure;
             }
             else if(numCharactersRead <= 2 || feof(openedFile)){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "unexpectedly encountered end of file or blank line after hmm tag.");
               return p7HmmFormatError;
@@ -516,6 +566,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             char *floatValuePtr = strtok(lineBuffer, " ");
             for(uint32_t i = 0; i < alphabetCardinality; i++){
               if(floatValuePtr == NULL){
+                free(lineBuffer);
                 char printBuffer[256];
                 sprintf(printBuffer, "Error reading value #%u from insert0 emissions line.", i+1);
                 printFormatError(fileSrc, lineNumber, printBuffer);
@@ -535,10 +586,12 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           size_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
           //check to make sure getline didn't have an allocation failure
           if(numCharactersRead == -1){
+            free(lineBuffer);
             printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer.");
             return p7HmmAllocationFailure;
           }
           else if(numCharactersRead <= 2 || feof(openedFile)){  //2 is a reasonable number to distinguish a trailing newline from a line with a tag
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "unexpectedly encountered end of file or blank line when expecting .");
               return p7HmmFormatError;
           }
@@ -557,6 +610,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             &currentPhmm->model.initialTransitions.insert0ToInsert0);
 
           if(scanVariablesFilled != 5){
+            free(lineBuffer);
             char errorMessageBuffer[256];
             sprintf(errorMessageBuffer,
               "expected 5 values from initial transitions line, but only got %u (there should be 7, but the last 2 are always 0.0 and *).",
@@ -582,6 +636,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           uint32_t nodeIndex = 0;
           int numItemsScanned = sscanf(firstTokenLocation, " %u ", &nodeIndex);
           if(numItemsScanned != 1){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber,
               "Error: could not parse node index from match emissions line.");
             return p7HmmFormatError;
@@ -590,6 +645,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
 
           //check to make sure that the node index agrees with what we'd expect
           if(nodeIndex != expectedNodeIndex){
+            free(lineBuffer);
             char errorMessageBuffer[256];
             sprintf(errorMessageBuffer,
               "expected node index value of %u, but received node index value %u.",
@@ -605,6 +661,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           for(size_t matchEmissionIndex = 0; matchEmissionIndex < alphabetCardinality; matchEmissionIndex++){
             tokenPointer = strtok(NULL, " ");
             if(tokenPointer == NULL){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize match emission line.");
               return p7HmmFormatError;
@@ -612,6 +669,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             size_t emissionScoreIndex = ((nodeIndex-1) * alphabetCardinality) + matchEmissionIndex; //-1 is to make the value zero-indexed
             numItemsScanned = sscanf(tokenPointer, " %f", &currentPhmm->model.matchEmissionScores[emissionScoreIndex]);
             if(numItemsScanned != 1){
+              free(lineBuffer);
               char errorMessageBuffer[256];
               sprintf(errorMessageBuffer,
                 "Error: could not parse match emission score %zu from match emissions line.",
@@ -625,12 +683,14 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           //read map annotation value
           tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
+            free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize map annotation value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
           if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasMapAnnotation)){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have map annotations, but integer value given on match line.");
             return p7HmmFormatError;
@@ -638,6 +698,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           else if(currentPhmm->header.hasMapAnnotation){
             numItemsScanned = sscanf(tokenPointer, " %u", &currentPhmm->model.mapAnnotations[nodeIndex - 1]);
             if(numItemsScanned != 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not parse integer value for map annotation value.");
               return p7HmmFormatError;
@@ -647,6 +708,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           //read consensus residue value
           tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
+            free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize consensus residue value");
               return p7HmmFormatError;
@@ -663,12 +725,14 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           //read reference annotation value
           tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
+            free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize reference annotation value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
           if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasReferenceAnnotation)){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have reference annotation, but character residue value was given on match line.");
             return p7HmmFormatError;
@@ -680,12 +744,14 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           //read model mask value
           tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
+            free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize model mask value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
           if((tokenPointer[0] != '-') && (!currentPhmm->header.hasModelMask)){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have reference annotation, but character residue value was given on match line.");
             return p7HmmFormatError;
@@ -697,12 +763,14 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           //read consensus structure value
           tokenPointer = strtok(NULL, " ");
           if(tokenPointer == NULL){
+            free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize consensus structure value");
               return p7HmmFormatError;
           }
           //check to see if the map annotation value's existance agrees with what we'd expect from hasMapAnnotation
           if(!(tokenPointer[0] == '-') && (!currentPhmm->header.hasConsensusStructure)){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber,
               "Error: header declared the file does not have reference annotation, but character residue value was given on match line.");
             return p7HmmFormatError;
@@ -718,11 +786,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
 
           //check to make sure getline didn't have an allocation failure
           if(numCharactersRead == -1){
+            free(lineBuffer);
             printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer for insert emissions line.");
             return p7HmmAllocationFailure;
           }
           else if(numCharactersRead <= 2){  //2 is a reasonable number to distinguish a trailing newline from a line with a tag
             if(feof(openedFile)){
+              free(lineBuffer);
               if(parserState == parsingHmmIdle){
                 return p7HmmSuccess;
               }
@@ -737,6 +807,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
 
           tokenPointer = strtok(lineBuffer, " ");
           if(tokenPointer == NULL){
+            free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not tokenize insert emission value.");
               return p7HmmFormatError;
@@ -744,6 +815,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           size_t indexIntoEmissionScores = (nodeIndex-1) * alphabetCardinality;
           sscanf(tokenPointer, " %f ", &currentPhmm->model.insertEmissionScores[indexIntoEmissionScores]);
           if(numItemsScanned != 1){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber,
               "Error: could not parse float value for insert emissions score.");
             return p7HmmFormatError;
@@ -752,12 +824,14 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           for(size_t insertEmissionScoreIndex = 1; insertEmissionScoreIndex < alphabetCardinality; insertEmissionScoreIndex++){
             tokenPointer = strtok(NULL, " ");
             if(tokenPointer == NULL){
+              free(lineBuffer);
                 printFormatError(fileSrc, lineNumber,
                   "Error: could not tokenize insert emission value.");
                 return p7HmmFormatError;
             }
             sscanf(tokenPointer, " %f ", &currentPhmm->model.insertEmissionScores[indexIntoEmissionScores + insertEmissionScoreIndex]);
             if(numItemsScanned != 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber,
                 "Error: could not parse float value for insert emissions score.");
               return p7HmmFormatError;
@@ -770,11 +844,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
 
           //check to make sure getline didn't have an allocation failure
           if(numCharactersRead == -1){
+            free(lineBuffer);
             printAllocationError(fileSrc, lineNumber, "getline failed to allocate buffer for state transitions line.");
             return p7HmmAllocationFailure;
           }
           else if(numCharactersRead <= 2){  //2 is a reasonable number to distinguish a trailing newline from a line with a tag
             if(feof(openedFile)){
+              free(lineBuffer);
               if(parserState == parsingHmmIdle){
                 return p7HmmSuccess;
               }
@@ -789,28 +865,33 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           //parse out the state transition scores.
           char *tokenLocation = strtok(lineBuffer, " ");
           if(tokenLocation == NULL){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse match to match state transition score (1st value on state transition line).");
             return p7HmmFormatError;
           }
           int numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.matchToMatch[nodeIndex - 1]);
           if(numScanned != 1){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse match to match state transition score (1st value on state transition line).");
             return p7HmmFormatError;
           }
 
           tokenLocation = strtok(NULL, " ");
           if(tokenLocation == NULL){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse match to insert state transition score (2nd value on state transition line).");
             return p7HmmFormatError;
           }
           numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.matchToInsert[nodeIndex - 1]);
           if(numScanned != 1){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse match to insert state transition score (2nd value on state transition line).");
             return p7HmmFormatError;
           }
 
           tokenLocation = strtok(NULL, " ");
           if(tokenLocation == NULL){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse match to delete state transition score(3rd value on state transition line).");
             return p7HmmFormatError;
           }
@@ -821,6 +902,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           else{
             numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.matchToDelete[nodeIndex - 1]);
             if(numScanned != 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "failed to parse match to delete state transition score(3rd value on state transition line).");
               return p7HmmFormatError;
             }
@@ -828,39 +910,46 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
 
           tokenLocation = strtok(NULL, " ");
           if(tokenLocation == NULL){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse insert to match state transition score (4th value on state transition line).");
             return p7HmmFormatError;
           }
           numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.insertToMatch[nodeIndex - 1]);
           if(numScanned != 1){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse insert to match state transition score (4th value on state transition line).");
             return p7HmmFormatError;
           }
 
           tokenLocation = strtok(NULL, " ");
           if(tokenLocation == NULL){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse insert to insert state transition score (5th value on state transition line).");
             return p7HmmFormatError;
           }
           numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.insertToInsert[nodeIndex - 1]);
           if(numScanned != 1){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse insert to insert state transition score (5th value on state transition line).");
             return p7HmmFormatError;
           }
 
           tokenLocation = strtok(NULL, " ");
           if(tokenLocation == NULL){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse delete to match state transition score (6th value on state transition line).");
             return p7HmmFormatError;
           }
           numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.deleteToMatch[nodeIndex - 1]);
           if(numScanned != 1){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse delete to match state transition score (6th value on state transition line).");
             return p7HmmFormatError;
           }
 
           tokenLocation = strtok(NULL, " ");
           if(tokenLocation == NULL){
+            free(lineBuffer);
             printFormatError(fileSrc, lineNumber, "failed to parse delete to delete state transition score (7th value on state transition line).");
             return p7HmmFormatError;
           }
@@ -871,6 +960,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
           else{
             numScanned = sscanf(tokenLocation, "%f", &currentPhmm->model.stateTransitions.deleteToDelete[nodeIndex - 1]);
             if(numScanned != 1){
+              free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "failed to parse delete to delete state transition score (7th value on state transition line).");
               return p7HmmFormatError;
             }

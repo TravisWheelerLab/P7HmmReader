@@ -75,6 +75,7 @@ void p7HmmInit(struct P7Hmm *phmm){
 
 void p7HmmDealloc(struct P7Hmm *phmm){
   free(phmm->header.version);
+  free(phmm->header.name);
   free(phmm->header.accessionNumber);
   free(phmm->header.description);
   free(phmm->header.date);
@@ -95,6 +96,7 @@ void p7HmmDealloc(struct P7Hmm *phmm){
   free(phmm->model.modelMask);
   free(phmm->model.consensusStructure);
   phmm->header.version = NULL;
+  phmm->header.name = NULL;
   phmm->header.accessionNumber = NULL;
   phmm->header.description = NULL;
   phmm->header.date = NULL;
@@ -123,6 +125,7 @@ void p7HmmListDealloc(struct P7HmmList *phmmList){
   free(phmmList->phmms);
   phmmList->phmms = NULL;
   phmmList->count = 0;
+  free(phmmList);
 }
 
 //returns 0 if the alphabet type is unsupported, although this shouldn't happen in practice
