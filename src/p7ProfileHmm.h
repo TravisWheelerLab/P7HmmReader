@@ -57,24 +57,6 @@ void p7HmmDealloc(struct P7Hmm *phmm);
  */
 struct P7Hmm *p7HmmListAppendHmm(struct P7HmmList *phmmList);
 
-/*
- * Function:  p7HmmGetAlphabetCardinality
- * --------------------
- * Returns the number of symbols in the alphabet of the given P7Hmm.
- *  This function is only meant to be called after parsing the header far enough
- *  to have encountered the 'ALPH' tag and have the alphabet set in the P7Hmm struct.
- *
- *  Inputs:
- *    currentPhmm: pointer to the phmm that you would like to know the alphabet cardinality of.
- *
- *  Returns:
- *    The total number of symbols in the given alphabet.
- *      Possible alphabets, and their cardinalities are as follows:
- *      amino: 20,    DNA: 4,   RNA: 4,   dice: 6,  coins: 2,
- *      or 0 if the alphabet has not been set (ALPHABET_NOT_SET).
- */
-uint32_t p7HmmGetAlphabetCardinality(const struct P7Hmm *const currentPhmm);
-
 
 /*
  * Function:  p7HmmAllocateModelData
