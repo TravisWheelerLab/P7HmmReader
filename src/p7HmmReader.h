@@ -100,8 +100,8 @@ struct P7HmmList{
 };
 
 
-enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phmmList);
 void p7HmmListInit(struct P7HmmList *phmmList);
+enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmmList);
 void p7HmmListDealloc(struct P7HmmList *phmmList);
 
 #endif

@@ -125,7 +125,6 @@ void p7HmmListDealloc(struct P7HmmList *phmmList){
   free(phmmList->phmms);
   phmmList->phmms = NULL;
   phmmList->count = 0;
-  free(phmmList);
 }
 
 //returns 0 if the alphabet type is unsupported, although this shouldn't happen in practice
