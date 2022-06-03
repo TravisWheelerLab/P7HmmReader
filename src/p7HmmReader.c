@@ -162,10 +162,14 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             strcpy(currentPhmm->header.accessionNumber, flagText);
           }
           if(strcmp(firstTokenLocation, P7_HEADER_DESCRIPTION_FLAG) == 0){
-            char *flagText = strtok(NULL, " ");
+            char *flagText = strtok(NULL, "");
             if(flagText == NULL){
               printFormatError(fileSrc, lineNumber, "couldn't parse description tag (DESC).");
               return p7HmmFormatError;
+            }
+            //fast forward past any spaces to the actual text.
+            while(flagText[0] == ' '){
+              flagText++;
             }
             currentPhmm->header.description = malloc(strlen(flagText)+1);
             if(currentPhmm->header.description == NULL){
@@ -313,6 +317,10 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
             char *flagText = strtok(NULL, "");  //leaving the delimeter empty goes until the string's null terminator
             if(flagText == NULL){
               printFormatError(fileSrc, lineNumber, "couldn't parse date tag (DATE).");
+            }
+            //fast forward past any spaces to the actual text.
+            while(flagText[0] == ' '){
+              flagText++;
             }
             currentPhmm->header.date = malloc(strlen(flagText) + 1);
             if(currentPhmm->header.date == NULL){
@@ -627,7 +635,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               "Error: header declared the file does not have map annotations, but integer value given on match line.");
             return p7HmmFormatError;
           }
-          else if(!(tokenPointer[0] == '-') && (currentPhmm->header.hasMapAnnotation)){
+          else if(currentPhmm->header.hasMapAnnotation){
             numItemsScanned = sscanf(tokenPointer, " %u", &currentPhmm->model.mapAnnotations[nodeIndex - 1]);
             if(numItemsScanned != 1){
               printFormatError(fileSrc, lineNumber,
@@ -699,7 +707,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList **phm
               "Error: header declared the file does not have reference annotation, but character residue value was given on match line.");
             return p7HmmFormatError;
           }
-          else if(tokenPointer[0] != '-'){
+          else if(currentPhmm->header.hasConsensusStructure){
             currentPhmm->model.consensusStructure[nodeIndex - 1] = tokenPointer[0];
           }
 
