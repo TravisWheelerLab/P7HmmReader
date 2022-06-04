@@ -155,4 +155,34 @@ void p7HmmListDealloc(struct P7HmmList *phmmList);
 uint32_t p7HmmGetAlphabetCardinality(const struct P7Hmm *const currentPhmm);
 
 
+/*
+ * Function:  p7HmmGetMatchEmissionScore
+ * --------------------
+ * Gets the match emission score from the given phmm, for the specified nodeIndex and symbol of the alphabet.
+ *
+ *  Inputs:
+ *    phmm: pointer to the phmm to extract the match emission score from
+ *    nodeIndex: position in the profile hmm, as specified by the node indices in the hmm file.
+ *    symbolIndex: which symbol of the profile hmm's alphabet to get the score for.
+ *
+ *  Returns:
+ *    float value of the match emission score, or NaN if the given nodeIndex or symbolIndex is out of range.
+ */
+float p7HmmGetMatchEmissionScore(const struct P7Hmm *const phmm, uint32_t nodeIndex, uint32_t symbolIndex);
+
+/*
+ * Function:  p7HmmGetInsertEmissionScores
+ * --------------------
+ * Gets the insert emission score from the given phmm, for the specified nodeIndex and symbol of the alphabet.
+ *
+ *  Inputs:
+ *    phmm: pointer to the phmm to extract the match emission score from
+ *    nodeIndex: position in the profile hmm, as specified by the node indices in the hmm file.
+ *    symbolIndex: which symbol of the profile hmm's alphabet to get the score for.
+ *
+ *  Returns:
+ *    float value of the insert emission score, or NaN if the given nodeIndex or symbolIndex is out of range.
+ */
+float p7HmmGetInsertEmissionScores(const struct P7Hmm *const phmm, uint32_t nodeIndex, uint32_t symbolIndex);
+
 #endif

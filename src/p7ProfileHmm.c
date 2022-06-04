@@ -1,5 +1,6 @@
 #include "p7ProfileHmm.h"
 #include <stdlib.h>
+#include <math.h>
 
 
 void p7HmmListInit(struct P7HmmList *phmmList){
@@ -196,5 +197,25 @@ enum P7HmmReturnCode p7HmmAllocateModelData(struct P7Hmm *currentPhmm){
   }
   else{
     return p7HmmAllocationFailure;
+  }
+}
+
+float p7HmmGetMatchEmissionScore(const struct P7Hmm *const phmm, uint32_t nodeIndex, uint32_t symbolIndex){
+  const uint32_t alphabetCardinality = p7HmmGetAlphabetCardinality(phmm);
+  if((symbolIndex >= alphabetCardinality) || (nodeIndex >= phmm->header.modelLength)){
+    return NAN;
+  }
+  else{
+    return phmm->model.matchEmissionScores[(nodeIndex * alphabetCardinality) + symbolIndex];
+  }
+}
+
+float p7HmmGetInsertEmissionScores(const struct P7Hmm *const phmm, uint32_t nodeIndex, uint32_t symbolIndex){
+  const uint32_t alphabetCardinality = p7HmmGetAlphabetCardinality(phmm);
+  if((symbolIndex >= alphabetCardinality) || (nodeIndex >= phmm->header.modelLength)){
+    return NAN;
+  }
+  else{
+    return phmm->model.insertEmissionScores[(nodeIndex * alphabetCardinality) + symbolIndex];
   }
 }
