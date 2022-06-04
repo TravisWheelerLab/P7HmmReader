@@ -69,9 +69,11 @@ As such, here is an example of how you might load and use the hmm file.
   enum P7HmmReturnCode returnCode = readP7Hmm(hmmFileSrc, &phmmList);
   if(returnCode == p7HmmAllocationFailure){
     printf("failed to allocate memory for the phmm List\n");
+    exit(1);
   }
   else if(returnCode == p7HmmFormatError){
     printf("failed to read phmm file due to formatting error\n");
+    exit(2);
   }
 
   //print the match emissions for the first profile hmm in the list
