@@ -27,7 +27,7 @@ struct P7InitialTransitions{
   float beginToDelete1;
   float insert0ToMatch1;
   float insert0ToInsert0;
-  //the last 2 transitions, (insert0 to match1 and insert0 to insert0) are guarnteed to be
+  //the last 2 transitions, (insert0 to match1 and insert0 to insert0) are guaranteed to be
   //values 0.0 and 1.0 respectively, as per the file spec.
 };
 
