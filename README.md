@@ -60,7 +60,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
 **'fileSrc'**  is the location of the profile hmm file to read.
 **'phmmList'** is a pointer to a phmmList struct to fill with data from the hmm file.
 
-As such, here is an example of how you might load and use the hmm file.
+As such, here is an example of how you might use the library. This example loads the profile hmm file, and prints all the match emission scores for the first profile hmm in the file.
 
 ``` c
   struct P7HmmList phmmList;
