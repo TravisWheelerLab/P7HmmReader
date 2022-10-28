@@ -71,7 +71,6 @@ struct P7Header{
   bool hasConsensusResidue;
   bool hasConsensusStructure;
   bool hasMapAnnotation;
-  enum P7Alphabet alphabet;
   uint32_t modelLength;
   uint32_t maxLength;
   uint32_t checksum;
@@ -86,6 +85,7 @@ struct P7Header{
   float gatheringThresholds[2];
   float trustedCutoffs[2];
   float noiseCutoffs[2];
+  enum P7Alphabet alphabet;
 };
 
 struct P7Hmm{
