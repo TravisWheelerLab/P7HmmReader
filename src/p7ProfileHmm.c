@@ -48,9 +48,9 @@ void p7HmmInit(struct P7Hmm *phmm){
   phmm->header.noiseCutoffs[0] = 0.0f;
   phmm->header.noiseCutoffs[1] = 0.0f;
   phmm->stats.msvGumbelMu = 0;
-  phmm->stats.msvGumbleLambda = 0;
-  phmm->stats.viterbiGumbleMu = 0;
-  phmm->stats.viterbiGumbleLambda = 0;
+  phmm->stats.msvGumbelLambda = 0;
+  phmm->stats.viterbiGumbelMu = 0;
+  phmm->stats.viterbiGumbelLambda = 0;
   phmm->stats.forwardTau = 0;
   phmm->stats.forwardLambda = 0;
   phmm->model.compo = NULL;
