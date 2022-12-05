@@ -33,9 +33,9 @@ struct P7InitialTransitions{
 
 struct P7Stats{
   float msvGumbelMu;
-  float msvGumbleLambda;
-  float viterbiGumbleMu;
-  float viterbiGumbleLambda;
+  float msvGumbelLambda;
+  float viterbiGumbelMu;
+  float viterbiGumbelLambda;
   float forwardTau;
   float forwardLambda;
 };

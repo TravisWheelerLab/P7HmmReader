@@ -4,20 +4,8 @@
 #include "../../src/p7ProfileHmm.h"
 #include "../test.h"
 
-char *amylaseFileSrc = "Alpha-amylase.hmm";
-char *oxFileSrc = "OxRdtase_C.hmm";
-char *t2FileSrc = "T2SSL.hmm";
-char *thioFileSrc = "Thioredoxin_10.hmm";
-char *taeFileSrc = "Tae4.hmm";
-char *combinedFileSrc = "combined.hmm";
+char *mutFileSrc = "mut.hmm";
 
-
-void amalyseHmmTest(struct P7Hmm *phmm);
-void oxHmmTest(struct P7Hmm *phmm);
-void t2HmmTest(struct P7Hmm *phmm);
-void thioHmmTest(struct P7Hmm *phmm);
-void taeHmmTest(struct P7Hmm *phmm);
-void combinedHmmTest(struct P7HmmList *phmmList);
 
 char printBuffer[2048];
 
@@ -33,11 +21,9 @@ bool floatCompare(float f1, float f2){
 int main(int argc, char ** argv){
   printf("\n\tstarting amylase test\n");
   struct P7HmmList phmmList;
-  enum P7HmmReturnCode rc = readP7Hmm(amylaseFileSrc, &phmmList);
+  enum P7HmmReturnCode rc = readP7Hmm(mutFileSrc, &phmmList);
   sprintf(printBuffer, "read hmm gave return code %u, expected success (%u)\n", rc, p7HmmSuccess);
-  testAssertString(rc == p7HmmSuccess, printBuffer);
-  testAssertString(phmmList.phmms != NULL, "phmmList Returned Null");
-  testAssertString(phmmList.count == 1, "phmmList did not have expected count of 1");
+
   amalyseHmmTest(&phmmList.phmms[0]);
   p7HmmListDealloc(&phmmList);
 

@@ -513,11 +513,11 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
             }
             if(strcmp(scoreDistributionName, "MSV") == 0){
               currentPhmm->stats.msvGumbelMu = mu;
-              currentPhmm->stats.msvGumbleLambda = lambda;
+              currentPhmm->stats.msvGumbelLambda = lambda;
             }
             else if(strcmp(scoreDistributionName, "VITERBI") == 0){
-              currentPhmm->stats.viterbiGumbleMu = mu;
-              currentPhmm->stats.viterbiGumbleLambda = lambda;
+              currentPhmm->stats.viterbiGumbelMu = mu;
+              currentPhmm->stats.viterbiGumbelLambda = lambda;
             }
 
             else if(strcmp(scoreDistributionName, "FORWARD") == 0){
