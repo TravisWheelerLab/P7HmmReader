@@ -453,10 +453,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.gatheringThresholds[0], &currentPhmm->header.gatheringThresholds[1]);
-            if(scanVariablesFilled < 2){
+            if(scanVariablesFilled == 1){
+              currentPhmm->header.gatheringThresholds[1] = NAN;
+            }
+            else if(scanVariablesFilled == 0){
               p7HmmListDealloc(phmmList);
               free(lineBuffer);
-              printFormatError(fileSrc, lineNumber, "expected 2 float values after GA tag.");
+              printFormatError(fileSrc, lineNumber, "expected 1 or 2 float values after GA tag.");
               return p7HmmFormatError;
             }
           }
@@ -469,10 +472,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.trustedCutoffs[0], &currentPhmm->header.trustedCutoffs[1]);
-            if(scanVariablesFilled != 2){
+            if(scanVariablesFilled == 1){
+              currentPhmm->header.trustedCutoffs[1] = NAN;
+            }
+            if(scanVariablesFilled == 0){
               p7HmmListDealloc(phmmList);
               free(lineBuffer);
-              printFormatError(fileSrc, lineNumber, "expected 2 float values after TC tag.");
+              printFormatError(fileSrc, lineNumber, "expected 1 or 2 float values after TC tag.");
               return p7HmmFormatError;
             }
           }
@@ -485,10 +491,13 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
               return p7HmmFormatError;
             }
             int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.noiseCutoffs[0], &currentPhmm->header.noiseCutoffs[1]);
-            if(scanVariablesFilled != 2){
+            if(scanVariablesFilled == 1){
+              currentPhmm->header.noiseCutoffs[1] = NAN;
+            }
+            else if(scanVariablesFilled == 2){
               p7HmmListDealloc(phmmList);
               free(lineBuffer);
-              printFormatError(fileSrc, lineNumber, "expected 2 float values after NC flag.");
+              printFormatError(fileSrc, lineNumber, "expected 1 or 2 float values after NC flag.");
               return p7HmmFormatError;
             }
           }
