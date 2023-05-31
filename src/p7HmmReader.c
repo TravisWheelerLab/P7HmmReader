@@ -455,7 +455,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
             //set the default values for the gathering thresholds to NAN, these will be overwritten if the GA line contained values
             currentPhmm->header.gatheringThresholds[0] = NAN;
             currentPhmm->header.gatheringThresholds[1] = NAN;
-            int scanVariablesFilled = sscanf(flagText, " %f %f", 
+            sscanf(flagText, " %f %f", 
               &currentPhmm->header.gatheringThresholds[0], &currentPhmm->header.gatheringThresholds[1]);
           }
           if(strcmp(firstTokenLocation, P7_HEADER_TRUSTED_FLAG) == 0){
@@ -469,7 +469,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
             //set the default values for the trusted cutoffs to NAN, these will be overwritten if the TC line contained values
             currentPhmm->header.trustedCutoffs[0] = NAN;
             currentPhmm->header.trustedCutoffs[1] = NAN;
-            int scanVariablesFilled = sscanf(flagText, " %f %f", 
+            sscanf(flagText, " %f %f", 
               &currentPhmm->header.trustedCutoffs[0], &currentPhmm->header.trustedCutoffs[1]);
           }
           if(strcmp(firstTokenLocation, P7_HEADER_NOISE_FLAG) == 0){
@@ -483,7 +483,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
             //set the default values for the noise cutoffs to NAN, these will be overwritten if the NC line contained values
             currentPhmm->header.noiseCutoffs[0] = NAN;
             currentPhmm->header.noiseCutoffs[1] = NAN;
-            int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.noiseCutoffs[0], &currentPhmm->header.noiseCutoffs[1]);
+            sscanf(flagText, " %f %f", &currentPhmm->header.noiseCutoffs[0], &currentPhmm->header.noiseCutoffs[1]);
           }
           if(strcmp(firstTokenLocation, P7_HEADER_STATS_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
