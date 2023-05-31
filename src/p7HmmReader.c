@@ -452,13 +452,11 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
               printFormatError(fileSrc, lineNumber, "couldn't parse GA tag.");
               return p7HmmFormatError;
             }
-            int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.gatheringThresholds[0], &currentPhmm->header.gatheringThresholds[1]);
-            if(scanVariablesFilled < 2){
-              p7HmmListDealloc(phmmList);
-              free(lineBuffer);
-              printFormatError(fileSrc, lineNumber, "expected 2 float values after GA tag.");
-              return p7HmmFormatError;
-            }
+            //set the default values for the gathering thresholds to NAN, these will be overwritten if the GA line contained values
+            currentPhmm->header.gatheringThresholds[0] = NAN;
+            currentPhmm->header.gatheringThresholds[1] = NAN;
+            sscanf(flagText, " %f %f", 
+              &currentPhmm->header.gatheringThresholds[0], &currentPhmm->header.gatheringThresholds[1]);
           }
           if(strcmp(firstTokenLocation, P7_HEADER_TRUSTED_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
@@ -468,13 +466,11 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
               printFormatError(fileSrc, lineNumber, "couldn't parse TC tag.");
               return p7HmmFormatError;
             }
-            int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.trustedCutoffs[0], &currentPhmm->header.trustedCutoffs[1]);
-            if(scanVariablesFilled != 2){
-              p7HmmListDealloc(phmmList);
-              free(lineBuffer);
-              printFormatError(fileSrc, lineNumber, "expected 2 float values after TC tag.");
-              return p7HmmFormatError;
-            }
+            //set the default values for the trusted cutoffs to NAN, these will be overwritten if the TC line contained values
+            currentPhmm->header.trustedCutoffs[0] = NAN;
+            currentPhmm->header.trustedCutoffs[1] = NAN;
+            sscanf(flagText, " %f %f", 
+              &currentPhmm->header.trustedCutoffs[0], &currentPhmm->header.trustedCutoffs[1]);
           }
           if(strcmp(firstTokenLocation, P7_HEADER_NOISE_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
@@ -484,13 +480,10 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
               printFormatError(fileSrc, lineNumber, "couldn't parse NC flag.");
               return p7HmmFormatError;
             }
-            int scanVariablesFilled = sscanf(flagText, " %f %f", &currentPhmm->header.noiseCutoffs[0], &currentPhmm->header.noiseCutoffs[1]);
-            if(scanVariablesFilled != 2){
-              p7HmmListDealloc(phmmList);
-              free(lineBuffer);
-              printFormatError(fileSrc, lineNumber, "expected 2 float values after NC flag.");
-              return p7HmmFormatError;
-            }
+            //set the default values for the noise cutoffs to NAN, these will be overwritten if the NC line contained values
+            currentPhmm->header.noiseCutoffs[0] = NAN;
+            currentPhmm->header.noiseCutoffs[1] = NAN;
+            sscanf(flagText, " %f %f", &currentPhmm->header.noiseCutoffs[0], &currentPhmm->header.noiseCutoffs[1]);
           }
           if(strcmp(firstTokenLocation, P7_HEADER_STATS_FLAG) == 0){
             char *flagText = strtok(NULL, "");//leaving the delimeter empty goes until the string's null terminator
