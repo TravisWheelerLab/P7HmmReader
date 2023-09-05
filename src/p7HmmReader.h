@@ -14,7 +14,7 @@
 
 
 enum P7HmmReturnCode{
-  p7HmmSuccess = 0, p7HmmAllocationFailure = -1, p7HmmFormatError = -2
+  p7HmmSuccess = 0, p7HmmAllocationFailure = -1, p7HmmFormatError = -2, p7HmmFileNotFound = -3
 };
 
 enum P7Alphabet{
