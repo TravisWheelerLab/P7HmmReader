@@ -29,7 +29,7 @@ void p7HmmInit(struct P7Hmm *phmm){
   phmm->header.hasConsensusResidue = false;
   phmm->header.hasConsensusStructure = false;
   phmm->header.hasMapAnnotation = false;
-  phmm->header.alphabet = ALPHABET_NOT_SET;
+  phmm->header.alphabet = P7HmmReaderAlphabetNotSet;
   phmm->header.modelLength = 0;
   phmm->header.maxLength = 0;
   phmm->header.numSequences = 0;
@@ -131,11 +131,11 @@ void p7HmmListDealloc(struct P7HmmList *phmmList){
 //returns 0 if the alphabet type is unsupported or unset
 uint32_t p7HmmGetAlphabetCardinality(const struct P7Hmm *const currentPhmm){
   switch(currentPhmm->header.alphabet){
-    case(amino): return 20;
-    case(DNA):  return 4;
-    case(RNA): return 4;
-    case(coins): return 2;
-    case(dice): return 6;
+    case(P7HmmReaderAlphabetAmino): return 20;
+    case(P7HmmReaderAlphabetDna):  return 4;
+    case(P7HmmReaderAlphabetRna): return 4;
+    case(P7HmmReaderAlphabetCoins): return 2;
+    case(P7HmmReaderAlphabetDice): return 6;
     default: return 0;
   }
 }

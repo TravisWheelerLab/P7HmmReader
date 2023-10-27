@@ -277,7 +277,7 @@ void amalyseHmmTest(struct P7Hmm *phmm){
   const char *expectedAccession = "PF00128.27";
   const char * expectedDescription = "Alpha amylase, catalytic domain";
   const uint32_t expectedLength = 336;
-  const enum P7Alphabet expectedAlphabet = amino;
+  const enum P7Alphabet expectedAlphabet = P7HmmReaderAlphabetAmino;
   const bool expectedRF = false;
   const bool expectedModelMask = false;
   const bool expectedConsResidue = true;
@@ -310,7 +310,7 @@ void oxHmmTest(struct P7Hmm *phmm){
   const char *expectedAccession = "PF19858.2";
   const char * expectedDescription = "Bacterial oxidoreductases, C-terminal";
   const uint32_t expectedLength = 163;
-  const enum P7Alphabet expectedAlphabet = amino;
+  const enum P7Alphabet expectedAlphabet = P7HmmReaderAlphabetAmino;
   const bool expectedRF = false;
   const bool expectedModelMask = false;
   const bool expectedConsResidue = true;
@@ -343,7 +343,7 @@ void t2HmmTest(struct P7Hmm *phmm){
   const char *expectedAccession = "PF05134.16";
   const char * expectedDescription = "Type II secretion system (T2SS), protein L";
   const uint32_t expectedLength = 233;
-  const enum P7Alphabet expectedAlphabet = amino;
+  const enum P7Alphabet expectedAlphabet = P7HmmReaderAlphabetAmino;
   const bool expectedRF = false;
   const bool expectedModelMask = false;
   const bool expectedConsResidue = true;
@@ -376,7 +376,7 @@ void thioHmmTest(struct P7Hmm *phmm){
   const char *expectedAccession = "PF17991.4";
   const char * expectedDescription = "Thioredoxin like C-terminal domain";
   const uint32_t expectedLength = 142;
-  const enum P7Alphabet expectedAlphabet = amino;
+  const enum P7Alphabet expectedAlphabet = P7HmmReaderAlphabetAmino;
   const bool expectedRF = false;
   const bool expectedModelMask = false;
   const bool expectedConsResidue = true;
@@ -410,7 +410,7 @@ void taeHmmTest(struct P7Hmm *phmm){
   const char *expectedAccession = "PF14113.9";
   const char * expectedDescription = "Type VI secretion system (T6SS), amidase effector protein 4";
   const uint32_t expectedLength = 121;
-  const enum P7Alphabet expectedAlphabet = amino;
+  const enum P7Alphabet expectedAlphabet = P7HmmReaderAlphabetAmino;
   const bool expectedRF = false;
   const bool expectedModelMask = false;
   const bool expectedConsResidue = true;

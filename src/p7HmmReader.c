@@ -233,21 +233,22 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
               return p7HmmFormatError;
             }
             if(strcmp(flagText, P7_HMM_READER_ALPHABET_AMINO) == 0){
-              currentPhmm->header.alphabet = amino;
+              currentPhmm->header.alphabet = P7HmmReaderAlphabetAmino;
             }
             else if(strcmp(flagText, P7_HMM_READER_ALPHABET_DNA) == 0){
-              currentPhmm->header.alphabet = DNA;
+              currentPhmm->header.alphabet = P7HmmReaderAlphabetDna;
             }
             else if(strcmp(flagText, P7_HMM_READER_ALPHABET_RNA) == 0){
-              currentPhmm->header.alphabet = RNA;
+              currentPhmm->header.alphabet = P7HmmReaderAlphabetRna;
             }
             else if(strcmp(flagText, P7_HMM_READER_ALPHABET_COINS) == 0){
-              currentPhmm->header.alphabet = coins;
+              currentPhmm->header.alphabet = P7HmmReaderAlphabetCoins;
             }
             else if(strcmp(flagText, P7_HMM_READER_ALPHABET_DICE) == 0){
-              currentPhmm->header.alphabet = dice;
+              currentPhmm->header.alphabet = P7HmmReaderAlphabetDice;
             }
             else{
+              currentPhmm->header.alphabet = P7HmmReaderAlphabetNotSet;
               p7HmmListDealloc(phmmList);
               free(lineBuffer);
               printFormatError(fileSrc, lineNumber, "expected 'amino', 'DNA', 'RNA', 'coins', or 'dice' after alphabet tag (ALPH).");

@@ -18,7 +18,8 @@ enum P7HmmReturnCode{
 };
 
 enum P7Alphabet{
-  amino, DNA, RNA, coins, dice, ALPHABET_NOT_SET
+  P7HmmReaderAlphabetAmino, P7HmmReaderAlphabetDna, P7HmmReaderAlphabetRna, 
+  P7HmmReaderAlphabetCoins, P7HmmReaderAlphabetDice, P7HmmReaderAlphabetNotSet
 };
 
 struct P7InitialTransitions{
