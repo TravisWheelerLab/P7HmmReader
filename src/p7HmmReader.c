@@ -70,7 +70,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
     bool completedParsingHmm = false; //used to determine if we're valid when we hit EOF
     while(true){
       lineNumber++;
-      size_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
+      ssize_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
 
       //check to make sure getline didn't have an allocation failure
       if(numCharactersRead == -1){
@@ -556,7 +556,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
 
             //also consume the next line of labels for the transition characters
             lineNumber++;
-            size_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
+            ssize_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
             if(numCharactersRead < 1){
               p7HmmListDealloc(phmmList);
               free(lineBuffer);
@@ -638,7 +638,7 @@ enum P7HmmReturnCode readP7Hmm(const char *const fileSrc, struct P7HmmList *phmm
 
           //read and parse the the transitions from the begin state and insert state 0
           lineNumber++;
-          size_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
+          ssize_t numCharactersRead = getline(&lineBuffer, &lineBufferLength, openedFile);
           //check to make sure getline didn't have an allocation failure
           if(numCharactersRead == -1){
             p7HmmListDealloc(phmmList);
